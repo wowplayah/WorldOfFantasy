@@ -12,12 +12,14 @@ public class ScriptPlayer : MonoBehaviour {
     TextMesh logText;
 
 	// Use this for initialization
+
 	void Start () {
         back = new Vector3(0, 0, -0.5f);
         forward = new Vector3(0, 0, 0.5f);
         left = new Vector3(-0.5f, 0, 0);
         right = new Vector3(0.5f, 0, 0);
         speed = movementSpeed;
+
         rigdbody = this.GetComponent<Rigidbody>();
 
         logText = GameObject.Find("LogText").gameObject.GetComponent<TextMesh>();
@@ -25,6 +27,7 @@ public class ScriptPlayer : MonoBehaviour {
 
     void FixedUpdate()
     {
+
         if(isJumping)
         {
             isJumping = false;
@@ -40,6 +43,7 @@ public class ScriptPlayer : MonoBehaviour {
 
     void Movement()
     {
+
         if(buttonPressCounter > 1)
         {
             Debug.Log("you press me twice");
@@ -66,6 +70,7 @@ public class ScriptPlayer : MonoBehaviour {
 
         if (Input.GetButtonDown("Jump"))
         {
+
             isJumping = true;
         }
 
@@ -74,8 +79,7 @@ public class ScriptPlayer : MonoBehaviour {
             buttonPressFirstTime = Time.time;
             transform.Translate(right * speed * Time.deltaTime);
         }
-
-        if (Input.GetAxis("Horizontal") < 0)
+        else if (Input.GetAxis("Horizontal") < 0)
         {
             buttonPressFirstTime = Time.time;
             transform.Translate(left * speed * Time.deltaTime);
@@ -86,11 +90,33 @@ public class ScriptPlayer : MonoBehaviour {
             buttonPressFirstTime = Time.time;
             transform.Translate(forward * speed * Time.deltaTime);
         }
-
-        if (Input.GetAxis("Vertical") < 0)
+        else if (Input.GetAxis("Vertical") < 0)
         {
             buttonPressFirstTime = Time.time;
             transform.Translate(back * speed * Time.deltaTime);
         }
+    }
+
+    void Behavior()
+    {
+        if (Input.GetButtonDown("Fire1"))
+        {
+            SpawnMeteor();
+        }
+        else if (Input.GetButtonDown("Fire2"))
+        {
+            FireMeteor();
+        }
+    }
+
+    void SpawnMeteor()
+    {
+        Rigidbody spawnMeteor = (Rigidbody)Instantiate(Meteor, new Vector3(transform.position.x, transform.position.y + 10, transform.position.z + 10), transform.rotation);
+        spawnMeteor.velocity = transform.up * -speed;
+    }
+    void FireMeteor()
+    {
+        Rigidbody spawnMeteor = (Rigidbody)Instantiate(Meteor, new Vector3(transform.position.x, transform.position.y, transform.position.z + 1), transform.rotation);
+        spawnMeteor.velocity = transform.forward * speed;
     }
 }
