@@ -4,79 +4,95 @@ using UnityEngine;
 
 public class ScriptPlayer : MonoBehaviour {
 
-    public Rigidbody Meteor;
-    float buttonPressDelay = 0.5f, buttonPressCount = 0, buttonPressFirstTime, speed, movementSpeed = 10, force = 10;
+    float speed, buttonPressCounter, buttonPressFirstTime;
+    public float jumpPower = 10, buttonPressDelay = 0.5f, movementSpeed = 10;
+    bool isJumping, isButtonDoublePressed = false;
+    Rigidbody rigdbody;
     Vector3 back, forward, left, right;
-    Rigidbody rigidbodyCharacter;
-    bool canJump;
+    TextMesh logText;
 
-    // Use this for initialization
+	// Use this for initialization
+
 	void Start () {
         back = new Vector3(0, 0, -0.5f);
         forward = new Vector3(0, 0, 0.5f);
         left = new Vector3(-0.5f, 0, 0);
         right = new Vector3(0.5f, 0, 0);
         speed = movementSpeed;
-        rigidbodyCharacter = GetComponent<Rigidbody>(); 
+
+        rigdbody = this.GetComponent<Rigidbody>();
+
+        logText = GameObject.Find("LogText").gameObject.GetComponent<TextMesh>();
 	}
 
     void FixedUpdate()
     {
-        if (canJump)
+
+        if(isJumping)
         {
-            canJump = false;
-            rigidbodyCharacter.AddForce(0, force, 0, ForceMode.Impulse);
+            isJumping = false;
+            rigdbody.AddForce(0, jumpPower, 0, ForceMode.Impulse);
         }
     }
-	
+
 	// Update is called once per frame
 	void Update () {
         Movement();
-        Behavior();
+        logText.text = movementSpeed.ToString();
 	}
 
     void Movement()
     {
-        if (Input.anyKeyDown)
+
+        if(buttonPressCounter > 1)
         {
-            buttonPressCount++;
-            Debug.Log(buttonPressCount);
-            //Debug.Log(Time.time + " - " + buttonPressFirstTime + "(" + (Time.time - buttonPressFirstTime) + ")" + " > " + buttonPressDelay);
-            if (buttonPressCount >= 2 && Time.time - buttonPressFirstTime < buttonPressDelay)
-            {
-                speed = movementSpeed * 2;
-            }
-            else
-            {
-                speed = movementSpeed;
-            }
-            buttonPressFirstTime = Time.time;
+            Debug.Log("you press me twice");
+            speed = movementSpeed * 2;
+            isButtonDoublePressed = true;
         }
-        else if (!Input.anyKeyDown && buttonPressCount > 2 || Time.time - buttonPressFirstTime > buttonPressDelay)
+        else
         {
-            buttonPressCount = 0;
+            speed = movementSpeed;
+        }
+
+        if (!Input.anyKey && isButtonDoublePressed == true)
+        {
+            Debug.Log("I have to reset you!");
+            buttonPressCounter = 0;
+            isButtonDoublePressed = false;
+        }
+
+        if (Input.anyKeyDown && isButtonDoublePressed == false && Time.time - buttonPressFirstTime < buttonPressDelay)
+        {
+            buttonPressCounter++;
+            Debug.Log(buttonPressCounter);
         }
 
         if (Input.GetButtonDown("Jump"))
         {
-            canJump = true;
+
+            isJumping = true;
         }
 
         if (Input.GetAxis("Horizontal") > 0)
         {
+            buttonPressFirstTime = Time.time;
             transform.Translate(right * speed * Time.deltaTime);
         }
         else if (Input.GetAxis("Horizontal") < 0)
         {
+            buttonPressFirstTime = Time.time;
             transform.Translate(left * speed * Time.deltaTime);
         }
 
         if (Input.GetAxis("Vertical") > 0)
         {
+            buttonPressFirstTime = Time.time;
             transform.Translate(forward * speed * Time.deltaTime);
         }
         else if (Input.GetAxis("Vertical") < 0)
         {
+            buttonPressFirstTime = Time.time;
             transform.Translate(back * speed * Time.deltaTime);
         }
     }
