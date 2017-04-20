@@ -7,7 +7,8 @@ public class ScriptPlayer : MonoBehaviour {
     float speed, buttonPressCounter, buttonPressFirstTime;
     public float jumpPower = 10, buttonPressDelay = 0.5f, movementSpeed = 10;
     bool isJumping, isButtonDoublePressed = false;
-    Rigidbody rigdbody;
+    public Rigidbody rigdbody;
+    Canvas inventory;
     Vector3 back, forward, left, right;
     TextMesh logText;
 
@@ -19,8 +20,9 @@ public class ScriptPlayer : MonoBehaviour {
         left = new Vector3(-0.5f, 0, 0);
         right = new Vector3(0.5f, 0, 0);
         speed = movementSpeed;
-
+        //
         rigdbody = this.GetComponent<Rigidbody>();
+        inventory = GameObject.Find("InventoryCanvas").gameObject.GetComponent<Canvas>();
 
         logText = GameObject.Find("LogText").gameObject.GetComponent<TextMesh>();
 	}
@@ -38,12 +40,13 @@ public class ScriptPlayer : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         Movement();
+        Behavior();
         logText.text = movementSpeed.ToString();
 	}
 
     void Movement()
     {
-
+        // mengecek, jika tombol ditekan lebih dari 2 kali, maka karakter tersebut akan lari
         if(buttonPressCounter > 1)
         {
             Debug.Log("you press me twice");
@@ -54,42 +57,48 @@ public class ScriptPlayer : MonoBehaviour {
         {
             speed = movementSpeed;
         }
-
+        // ini untuk mereset tombol agar tidak lari lagi
         if (!Input.anyKey && isButtonDoublePressed == true)
         {
             Debug.Log("I have to reset you!");
             buttonPressCounter = 0;
             isButtonDoublePressed = false;
         }
-
+        // ini untuk menghitung berapa kali tombol di tekan
         if (Input.anyKeyDown && isButtonDoublePressed == false && Time.time - buttonPressFirstTime < buttonPressDelay)
         {
             buttonPressCounter++;
-            Debug.Log(buttonPressCounter);
+            //Debug.Log(buttonPressCounter);
         }
-
+        // ini untuk membuka inventory
+        if (Input.GetButtonDown("Inventory"))
+        {
+            inventory.enabled = !inventory.enabled;
+        }
+        // ini untuk lompat
         if (Input.GetButtonDown("Jump"))
         {
-
             isJumping = true;
         }
-
+        // ini untuk bergerak ke atas
         if (Input.GetAxis("Horizontal") > 0)
         {
             buttonPressFirstTime = Time.time;
             transform.Translate(right * speed * Time.deltaTime);
         }
+        // ini untuk bergerak ke bawah
         else if (Input.GetAxis("Horizontal") < 0)
         {
             buttonPressFirstTime = Time.time;
             transform.Translate(left * speed * Time.deltaTime);
         }
-
+        // ini untuk bergerak ke kiri
         if (Input.GetAxis("Vertical") > 0)
         {
             buttonPressFirstTime = Time.time;
             transform.Translate(forward * speed * Time.deltaTime);
         }
+        // ini untuk bergerak ke kanan
         else if (Input.GetAxis("Vertical") < 0)
         {
             buttonPressFirstTime = Time.time;
@@ -111,12 +120,12 @@ public class ScriptPlayer : MonoBehaviour {
 
     void SpawnMeteor()
     {
-        Rigidbody spawnMeteor = (Rigidbody)Instantiate(Meteor, new Vector3(transform.position.x, transform.position.y + 10, transform.position.z + 10), transform.rotation);
+        Rigidbody spawnMeteor = (Rigidbody)Instantiate(rigdbody, new Vector3(transform.position.x, transform.position.y + 10, transform.position.z + 10), transform.rotation);
         spawnMeteor.velocity = transform.up * -speed;
     }
     void FireMeteor()
     {
-        Rigidbody spawnMeteor = (Rigidbody)Instantiate(Meteor, new Vector3(transform.position.x, transform.position.y, transform.position.z + 1), transform.rotation);
+        Rigidbody spawnMeteor = (Rigidbody)Instantiate(rigdbody, new Vector3(transform.position.x, transform.position.y, transform.position.z + 1), transform.rotation);
         spawnMeteor.velocity = transform.forward * speed;
     }
 }
